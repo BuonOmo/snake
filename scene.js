@@ -10,7 +10,6 @@ export default class Scene {
 		if (this.width !== Math.floor(this.width) || this.height !== Math.floor(this.height)) {
 			throw 'Something to do here'
 		}
-		this._canvas = canvas
 		this._ctx = canvas.getContext('2d')
 		this.snake = snake
 		this._objects = []
@@ -38,10 +37,11 @@ export default class Scene {
 			if (collisions || this.snakeHeadMeetsWall()) {
 				this.snake.die()
 				this.stop()
+				return
 			}
 
 			if (oldPosition !== undefined) this._clearRect(oldPosition)
-			if (newPosition !== undefined) this._drawRect(newPosition)
+			if (newPosition !== undefined) this._drawRect(newPosition, this.snake.color)
 			if (fruitEaten) {
 				this.addObject(new Fruit(this.availableRandomPosition()))
 			}
@@ -75,7 +75,7 @@ export default class Scene {
 
 	addObject(object) {
 		this._objects.push(object)
-		object.positions.forEach((position) => this._drawRect(position))
+		object.positions.forEach((position) => this._drawRect(position, object.color))
 	}
 
 	checkCollisions(currentObject, currentPosition) {
@@ -88,8 +88,9 @@ export default class Scene {
 		})
 	}
 
-	_drawRect(x, y) {
+	_drawRect([x, y], color) {
 		if (y === undefined) [x, y] = x
+		this._ctx.fillStyle = color
 		this._ctx.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
 	}
 

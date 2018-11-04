@@ -1,8 +1,10 @@
 import SceneObject from './scene-object.js'
 
 export default class Fruit extends SceneObject {
-	constructor(position, value = Math.ceil(3 * Math.random())) {
-		super([position])
+	constructor(position, { isCritical = Math.random() > 0.9,
+		                      color = isCritical ? 'cornflowerblue' : 'black',
+		                      value = isCritical ? 20 : 5 } = {}) {
+		super([position], color)
 		this.value = value
 		this.isEatable = true
 	}

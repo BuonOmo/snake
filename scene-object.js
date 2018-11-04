@@ -1,6 +1,7 @@
 export default class SceneObject {
-	constructor(positions) {
+	constructor(positions, color = 'black') {
 		this.positions = positions
+		this.color = color
 	}
 
 	checkSelfCollisions(currentPosition) {
