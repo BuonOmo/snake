@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Canvas experiments</title>
+    <title>A Canvas snake</title>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+
     <style>
         body {
             margin: auto;
@@ -12,10 +14,15 @@
         canvas {
             border: 1px solid black;
         }
+        * {
+            font-family: 'Roboto', sans-serif;
+        }
     </style>
 </head>
 <body>
 <canvas id="game" width="600" height="400"></canvas>
+<p> score: <span id="score">0</span> / best: <span id="best">..</span></p>
+<button id="restart" hidden>try again</button>
 <script src="index.js" type="module"></script>
 </body>
 </html>

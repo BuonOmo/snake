@@ -8,11 +8,13 @@ const DIRECTION = {
 }
 
 export default class Snake extends SceneObject {
-	constructor(size = 10, direction = DIRECTION.right, headX = 20, headY = 20) {
+	constructor({size = 10, direction = DIRECTION.right, headX = 20, headY = 20, onSizeUpdate = () => {}, onDie = () => {}}) {
 		const positions = [...new Array(size)].map((_, index) => [headX - index, headY])
 		super(positions)
 		this.size = size
 		this.direction = direction
+		this.onSizeUpdate = onSizeUpdate
+		this.onDie = onDie
 		this._nextDirections = []
 	}
 
@@ -40,6 +42,11 @@ export default class Snake extends SceneObject {
 
 	eat(fruit) {
 		this.size += fruit.value
+		this.onSizeUpdate(this.size)
+	}
+
+	die() {
+		this.onDie()
 	}
 
 	move() {

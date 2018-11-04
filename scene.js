@@ -35,8 +35,10 @@ export default class Scene {
 				}
 				return true
 			})
-			if (collisions) this.stop()
-			if (this.snakeHeadMeetsWall()) this.stop()
+			if (collisions || this.snakeHeadMeetsWall()) {
+				this.snake.die()
+				this.stop()
+			}
 
 			if (oldPosition !== undefined) this._clearRect(oldPosition)
 			if (newPosition !== undefined) this._drawRect(newPosition)
