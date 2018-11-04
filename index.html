@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>A Canvas snake</title>
+    <title>Another snake game - by Ulysse Buonomo</title>
     <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 
     <style>
         body {
             margin: auto;
-            width: 600px;
+            width: 602px;
             padding-top: 60px;
         }
         canvas {
@@ -17,12 +17,39 @@
         * {
             font-family: 'Roboto', sans-serif;
         }
+
+        button {
+            border: 1px solid black;
+            font-size: initial;
+        }
+
+        button:hover {
+            background: black;
+            color: white;
+        }
+
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .small {
+            width: 200px;
+            height: 24px;
+        }
     </style>
 </head>
 <body>
+<iframe src="https://ghbtns.com/github-btn.html?user=buonomo&repo=snake&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
 <canvas id="game" width="600" height="400"></canvas>
-<p> score: <span id="score">0</span> / best: <span id="best">..</span></p>
-<button id="restart" hidden>try again</button>
+<div class="container">
+    <div class="container small">
+        <div> score: <span id="score">0</span></div>
+        <div>best: <span id="best">..</span></div>
+    </div>
+    <button id="restart" hidden>try again</button>
+</div>
 <script src="index.js" type="module"></script>
 </body>
 </html>

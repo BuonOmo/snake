@@ -20,17 +20,23 @@ const updateScore = (snakeSize) => {
 	scoreContainer.innerText = score.toString()
 }
 
+let currentGame = false
+
 const loadGame = () => {
+	if (currentGame) return false
+
+	currentGame = true
 	restartButton.setAttribute('hidden', 'hidden')
 	scoreContainer.innerText = "0"
 	canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 	game.scene = null
-	game.snake = new Snake({ size: 10, onSizeUpdate: updateScore, onDie: showRestartButton })
+	game.snake = new Snake({ size: 10, onSizeUpdate: updateScore, onDie: allowRestart })
 	game.scene = new Scene(canvas, game.snake)
 	game.scene.start()
 }
 
-const showRestartButton = () => {
+const allowRestart = () => {
+	currentGame = false
 	restartButton.removeAttribute('hidden')
 }
 
@@ -43,6 +49,8 @@ window.addEventListener('keydown', (event) => {
 		if (game.snake) {
 			game.snake.nextDirection = event.key.slice(5)
 		}
+	} else if (event.key === " ") {
+		loadGame()
 	}
 }, false)
 
