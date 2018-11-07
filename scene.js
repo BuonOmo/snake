@@ -2,6 +2,22 @@ import Snake from './snake.js'
 import Fruit from './fruit.js'
 import SceneObject from './scene-object.js'
 
+/**
+ * @type {CanvasRenderingContext2D|null}
+ */
+let context
+
+/**
+ * @type {SceneObject[]}
+ */
+let objects = []
+
+/**
+ * Interval ID
+ * @type {Number}
+ */
+let refreshInterval
+
 export default class Scene {
 	constructor(canvas, snake = new Snake, frameReload = 40, blockSize = 10) {
 		this.blockSize = blockSize
@@ -10,9 +26,9 @@ export default class Scene {
 		if (this.width !== Math.floor(this.width) || this.height !== Math.floor(this.height)) {
 			throw 'Something to do here'
 		}
-		this._ctx = canvas.getContext('2d')
+		context = canvas.getContext('2d')
 		this.snake = snake
-		this._objects = []
+		objects = []
 		this.frameReload = frameReload
 
 		this.addObject(snake)
@@ -21,7 +37,7 @@ export default class Scene {
 	start() {
 		this.addObject(new Fruit(this.availableRandomPosition()))
 
-		this._refreshInterval = window.setInterval(() => {
+		refreshInterval = window.setInterval(() => {
 			const [oldPosition, newPosition] = this.snake.move()
 			let fruitEaten = false
 
@@ -55,7 +71,7 @@ export default class Scene {
 	}
 
 	stop() {
-		window.clearInterval(this._refreshInterval)
+		window.clearInterval(refreshInterval)
 	}
 
 	availableRandomPosition() {
@@ -69,17 +85,17 @@ export default class Scene {
 	}
 
 	removeObject(object) {
-		this._objects = this._objects.filter((o) => o !== object)
+		objects = objects.filter((o) => o !== object)
 		object.positions.forEach((position) => this._clearRect(position))
 	}
 
 	addObject(object) {
-		this._objects.push(object)
+		objects.push(object)
 		object.positions.forEach((position) => this._drawRect(position, object.color))
 	}
 
 	checkCollisions(currentObject, currentPosition) {
-		return this._objects.filter((object) => {
+		return objects.filter((object) => {
 			if (currentObject === object) {
 				return object.checkSelfCollisions(currentPosition)
 			} else {
@@ -90,12 +106,12 @@ export default class Scene {
 
 	_drawRect([x, y], color) {
 		if (y === undefined) [x, y] = x
-		this._ctx.fillStyle = color
-		this._ctx.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
+		context.fillStyle = color
+		context.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
 	}
 
 	_clearRect(x, y) {
 		if (y === undefined) [x, y] = x
-		this._ctx.clearRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
+		context.clearRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
 	}
 }

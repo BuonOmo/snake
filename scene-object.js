@@ -1,7 +1,14 @@
+let index = 0
+
 export default class SceneObject {
 	constructor(positions, color = 'black') {
 		this.positions = positions
 		this.color = color
+		this.id = index++
+	}
+
+	get hash() {
+		return String(this.id)
 	}
 
 	checkSelfCollisions(currentPosition) {
