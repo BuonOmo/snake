@@ -19,7 +19,7 @@ let objects = []
 let refreshInterval
 
 export default class Scene {
-	constructor(canvas, snake = new Snake, frameReload = 40, blockSize = 10) {
+	constructor(canvas, snakes = [new Snake], frameReload = 40, blockSize = 10) {
 		this.blockSize = blockSize
 		this.width = canvas.width / blockSize
 		this.height = canvas.height / blockSize
@@ -27,37 +27,49 @@ export default class Scene {
 			throw 'Something to do here'
 		}
 		context = canvas.getContext('2d')
-		this.snake = snake
+		this.snakes = snakes
 		objects = []
 		this.frameReload = frameReload
-
-		this.addObject(snake)
+		snakes.forEach((snake) => this.addObject(snake))
 	}
 
 	start() {
 		this.addObject(new Fruit(this.availableRandomPosition()))
 
 		refreshInterval = window.setInterval(() => {
-			const [oldPosition, newPosition] = this.snake.move()
-			let fruitEaten = false
-
-			const collisions = this.checkCollisions(this.snake, this.snake.head).some((object) => {
-				if(object.isEatable) {
-					this.snake.eat(object)
-					this.removeObject(object)
-					fruitEaten = true
-					return false
-				}
-				return true
+			const oldPositions = []
+			const newPositions = []
+			this.snakes.forEach((snake) => {
+				const [oldPosition, newPosition] = snake.move()
+				oldPositions.push(oldPosition)
+				newPositions.push(newPosition)
 			})
-			if (collisions || this.snakeHeadMeetsWall()) {
-				this.snake.die()
-				this.stop()
-				return
-			}
 
-			if (oldPosition !== undefined) this._clearRect(oldPosition)
-			if (newPosition !== undefined) this._drawRect(newPosition, this.snake.color)
+			let fruitEaten = false
+			this.snakes.forEach((snake) => {
+				const collisions = this.checkCollisions(snake, snake.head).some((object) => {
+					if(object.isEatable) {
+						snake.eat(object)
+						this.removeObject(object)
+						fruitEaten = true
+						return false
+					}
+					return true
+				})
+				if (collisions || this.snakeHeadMeetsWall(snake)) {
+					snake.die()
+					this.stop()
+					return
+				}
+			})
+
+			oldPositions.forEach(position => {
+				if (position !== undefined) this._clearRect(position)
+			})
+			newPositions.forEach((position, index) => {
+				if (position !== undefined) this._drawRect(position, this.snakes[index].color)
+			})
+
 			if (fruitEaten) {
 				this.addObject(new Fruit(this.availableRandomPosition()))
 			}
@@ -65,8 +77,8 @@ export default class Scene {
 	}
 
 	// TODO: this may be treated as a usual collision.
-	snakeHeadMeetsWall() {
-		const [headX, headY] = this.snake.head
+	snakeHeadMeetsWall(snake) {
+		const [headX, headY] = snake.head
 		return headX < 0 || headX >= this.width || headY < 0 || headY >= this.height;
 	}
 

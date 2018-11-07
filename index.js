@@ -10,6 +10,20 @@ let bestScore = Number(localStorage.getItem("editmetohavethebestscoreever"))
 
 bestScoreContainer.innerText = bestScore.toString()
 
+console.log('Update `buttonPlayer1`, or `ButtonPlayer2` to change keyboard mapping (do not use space)')
+window.buttonPlayer1 = {
+	ArrowUp: 'Up',
+	ArrowLeft: 'Left',
+	ArrowDown: 'Down',
+	ArrowRight: 'Right'
+}
+window.buttonPlayer2 = {
+	w: 'Up',
+	a: 'Left',
+	s: 'Down',
+	d: 'Right'
+}
+
 const updateScore = (snakeSize) => {
 	const score = snakeSize - 10
 	if (score > bestScore) {
@@ -30,8 +44,11 @@ const loadGame = () => {
 	scoreContainer.innerText = '0'
 	canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
 	game.scene = null
-	game.snake = new Snake({ size: 10, onSizeUpdate: updateScore, onDie: allowRestart })
-	game.scene = new Scene(canvas, game.snake)
+	game.snakes = [
+		new Snake({ size: 10, headY: 1, onSizeUpdate: updateScore, color: 'steelblue', onDie: allowRestart }),
+		new Snake({ size: 10, headY: 38, onDie: allowRestart, color: 'brown' })
+	]
+	game.scene = new Scene(canvas, game.snakes)
 	game.scene.start()
 }
 
@@ -45,9 +62,13 @@ const game = {}
 loadGame()
 
 window.addEventListener('keydown', (event) => {
-	if (event.key.startsWith("Arrow")) {
-		if (game.snake) {
-			game.snake.nextDirection = event.key.slice(5)
+	if (buttonPlayer1[event.key] !== undefined) {
+		if (game.snakes[0]) {
+			game.snakes[0].nextDirection = buttonPlayer1[event.key]
+		}
+	} else if (buttonPlayer2[event.key] !== undefined) {
+		if (game.snakes[1]) {
+			game.snakes[1].nextDirection = buttonPlayer2[event.key]
 		}
 	} else if (event.key === ' ') {
 		loadGame()
