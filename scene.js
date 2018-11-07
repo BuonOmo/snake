@@ -105,13 +105,11 @@ export default class Scene {
 	}
 
 	_drawRect([x, y], color) {
-		if (y === undefined) [x, y] = x
 		context.fillStyle = color
 		context.fillRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
 	}
 
-	_clearRect(x, y) {
-		if (y === undefined) [x, y] = x
+	_clearRect([x, y]) {
 		context.clearRect(x * this.blockSize, y * this.blockSize, this.blockSize, this.blockSize)
 	}
 }

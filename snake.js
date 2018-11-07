@@ -12,9 +12,10 @@ export default class Snake extends SceneObject {
 								direction = DIRECTION.right,
 								headX = 20, headY = 20,
 								onSizeUpdate = () => {},
-								onDie = () => {} } = {}) {
+								onDie = () => {},
+							  color = 'black' } = {}) {
 		const positions = [...new Array(size)].map((_, index) => [headX - index, headY])
-		super(positions)
+		super(positions, color)
 		this.size = size
 		this.direction = direction
 		this.onSizeUpdate = onSizeUpdate
@@ -27,7 +28,7 @@ export default class Snake extends SceneObject {
 		const vertical = [DIRECTION.up, DIRECTION.down]
 		const lastDirection = this._nextDirections.length === 0
 			? this.direction
-			: this._nextDirections[this._nextDirections.length]
+			: this._nextDirections[this._nextDirections.length - 1]
 		return [horizontal, vertical].some((axe) => axe.includes(direction) && axe.includes(lastDirection))
 	}
 	set nextDirection(direction) {
