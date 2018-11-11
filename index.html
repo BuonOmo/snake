@@ -18,12 +18,15 @@
             font-family: 'Roboto', sans-serif;
         }
 
-        button {
+        button, a {
             border: 1px solid black;
             font-size: initial;
+            padding: 2px 7px;
+            text-decoration: none;
+            color: black;
         }
 
-        button:hover {
+        button:hover, a:hover {
             background: black;
             color: white;
         }
@@ -32,16 +35,32 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 5px;
         }
 
         .small {
             width: 200px;
             height: 24px;
         }
+
+        .gh-ico {
+            margin-bottom: -2px;
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background: url('gh.png');
+            background-repeat: no-repeat;
+            background-size: 100% 100%;
+            margin-right: 4px;
+        }
+
+        a:hover > .gh-ico {
+            background-image: url('gh-light.png');
+        }
     </style>
 </head>
 <body>
-<iframe src="https://ghbtns.com/github-btn.html?user=buonomo&repo=snake&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
+    <a href="https://github.com/buonomo/snake/"><span class="gh-ico"></span> star<span id="stars"></span></a>
 <canvas id="game" width="600" height="400"></canvas>
 <div class="container">
     <div class="container small">

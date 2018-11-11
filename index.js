@@ -24,6 +24,14 @@ window.buttonPlayer2 = {
 	d: 'Right'
 }
 
+const getStars = async () => {
+	const response = await fetch('https://api.github.com/repos/buonomo/snake')
+	const data = await response.json()
+	document.getElementById('stars').innerText = ` (${data.stargazers_count})`
+}
+
+getStars()
+
 const updateScore = (snakeSize) => {
 	const score = snakeSize - 10
 	if (score > bestScore) {
