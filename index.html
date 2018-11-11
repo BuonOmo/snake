@@ -60,13 +60,16 @@
     </style>
 </head>
 <body>
+<div class="container">
     <a href="https://github.com/buonomo/snake/"><span class="gh-ico"></span> star<span id="stars"></span></a>
+    <button id="online">play online</button>
+</div>
 <canvas id="game" width="600" height="400"></canvas>
 <div class="container">
-    <div class="container small">
+    <span class="container small">
         <div> score: <span id="score">0</span></div>
         <div>best: <span id="best">..</span></div>
-    </div>
+    </span>
     <button id="restart" hidden>try again</button>
 </div>
 <script src="index.js" type="module"></script>

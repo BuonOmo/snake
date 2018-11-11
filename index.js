@@ -1,12 +1,13 @@
 import Snake from './snake.js'
 import Scene from './scene.js'
 
-const canvas = document.getElementById("game")
-const scoreContainer = document.getElementById("score")
-const bestScoreContainer = document.getElementById("best")
-const restartButton = document.getElementById("restart")
+const canvas = document.getElementById('game')
+const scoreContainer = document.getElementById('score')
+const bestScoreContainer = document.getElementById('best')
+const restartButton = document.getElementById('restart')
+const playOnlineButton = document.getElementById('online')
 
-let bestScore = Number(localStorage.getItem("editmetohavethebestscoreever"))
+let bestScore = Number(localStorage.getItem('editmetohavethebestscoreever'))
 
 bestScoreContainer.innerText = bestScore.toString()
 
@@ -24,6 +25,8 @@ window.buttonPlayer2 = {
 	d: 'Right'
 }
 
+const path = `${window.location.protocol}//${window.location.host}${window.location.pathname}`
+
 const getStars = async () => {
 	const response = await fetch('https://api.github.com/repos/buonomo/snake')
 	const data = await response.json()
@@ -31,6 +34,31 @@ const getStars = async () => {
 }
 
 getStars()
+
+const peerConnection = new RTCPeerConnection(null)
+let description = null
+peerConnection.onicecandidate = (event) => {
+	if (event.candidate) return
+	description = peerConnection.localDescription
+	playOnlineButton.addEventListener('click', async () => {
+		await navigator.clipboard.writeText(`${path}?join=${btoa(JSON.stringify(description))}`)
+		playOnlineButton.innerText = 'invitation copied to clipboard'
+	})
+}
+
+const createOfferSDP = async () => {
+	const dataChannel = peerConnection.createDataChannel("chat");
+	const description = await peerConnection.createOffer()
+	peerConnection.setLocalDescription(description)
+
+	dataChannel.onopen = () => { console.log('connected!') }
+	dataChannel.onmessage = ({ data }) => {
+		if (data) console.log(data)
+		else console.log('message without data')
+	}
+};
+
+createOfferSDP()
 
 const updateScore = (snakeSize) => {
 	const score = snakeSize - 10
