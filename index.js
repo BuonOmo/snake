@@ -6,10 +6,133 @@ const scoreContainer = document.getElementById('score')
 const bestScoreContainer = document.getElementById('best')
 const restartButton = document.getElementById('restart')
 const playOnlineButton = document.getElementById('online')
+const responseField = document.getElementById('response')
 
 let bestScore = Number(localStorage.getItem('editmetohavethebestscoreever'))
 
 bestScoreContainer.innerText = bestScore.toString()
+
+const SDP_STORAGE = 'SDP_STORAGE'
+
+const params = new URLSearchParams(location.search)
+let joinDescription = params.get('join')
+let ensureDescription = params.get('ensure')
+
+
+function createConnection() {
+	const peerConnection = new RTCPeerConnection(null)
+	let description
+
+	peerConnection.oniceconnectionstatechange = () => {
+		console.log(`ICE connection state changed to ${peerConnection.iceConnectionState}`)
+	}
+
+	peerConnection.onicecandidate = (event) => {
+		if (event.candidate) return
+		description = peerConnection.localDescription
+		localStorage.setItem(SDP_STORAGE, JSON.stringify(peerConnection.localDescription))
+		playOnlineButton.onclick = async () => {
+			await navigator.clipboard.writeText(`${path}?join=${btoa(JSON.stringify(description))}`)
+			playOnlineButton.innerText = 'invitation copied to clipboard'
+			setTimeout(() => {
+				responseField.removeAttribute('hidden')
+			}, 2000)
+		}
+	}
+
+	const createOfferSDP = async () => {
+		const dataChannel = peerConnection.createDataChannel("chat")
+		const description = await peerConnection.createOffer()
+		peerConnection.setLocalDescription(description)
+
+		dataChannel.onopen = () => {
+			playOnlineButton.disabled = true
+			playOnlineButton.innerText = 'connected'
+		}
+		dataChannel.onmessage = ({data}) => {
+			if (data) console.log(data)
+			else console.log('message without data')
+		}
+	}
+
+	responseField.addEventListener('focus', async () => {
+		try {
+			const data = await navigator.clipboard.readText()
+			responseField.innerText = data
+			start(data)
+			responseField.setAttribute('hidden', 'hidden')
+		} catch (e) {
+			responseField.placeholder = 'please paste data manually'
+		}
+	})
+
+	responseField.addEventListener('paste', (e) => {
+		const clipboardData = e.clipboardData || window.clipboardData
+		const pastedData = clipboardData.getData('Text')
+		start(pastedData)
+		responseField.setAttribute('hidden', 'hidden')
+	})
+
+	function start(data) {
+		const remoteDescription = new RTCSessionDescription(JSON.parse(atob(data)))
+		peerConnection.setRemoteDescription(remoteDescription)
+	}
+	createOfferSDP()
+}
+
+function joinConnection() {
+	const sdpConstraints = { optional: [{RtpDataChannels: true}]  }
+	const peerConnection = new RTCPeerConnection(null)
+	let dataChannel, description
+	peerConnection.ondatachannel = function(e) {
+		dataChannel = e.channel
+		dataChannel.onopen = () => {
+			playOnlineButton.disabled = true
+			playOnlineButton.innerText = 'connected'
+		}
+		dataChannel.onmessage = ({data}) => {
+			if (data) console.log(data)
+			else console.log('message without data')
+		}
+	}
+
+	peerConnection.onicecandidate = function(e) {
+		if (e.candidate) return
+		playOnlineButton.innerText = 'click here to copy response'
+		playOnlineButton.onclick = async () => {
+			await navigator.clipboard.writeText(btoa(JSON.stringify(description)))
+			playOnlineButton.innerText = 'response copied to clipboard'
+		}
+	}
+
+	peerConnection.oniceconnectionstatechange = () => {
+		console.log(`ICE connection state changed to ${peerConnection.iceConnectionState}`)
+	}
+
+	function createAnswerSDP() {
+		const offerDesc = new RTCSessionDescription(joinDescription)
+		peerConnection.setRemoteDescription(offerDesc)
+		peerConnection.createAnswer(function (answerDesc) {
+			  description = answerDesc
+				peerConnection.setLocalDescription(answerDesc)
+			}, function () {console.warn("Couldn't create offer")},
+			sdpConstraints)
+	}
+
+	createAnswerSDP()
+}
+
+if (!ensureDescription && !joinDescription) {
+	createConnection()
+} else if (joinDescription) {
+	joinDescription = JSON.parse(atob(joinDescription))
+	joinConnection()
+} else if (ensureDescription) {
+	ensureDescription = JSON.parse(atob(ensureDescription))
+	ensureConnection()
+}
+
+
 
 console.log('Update `buttonPlayer1`, or `ButtonPlayer2` to change keyboard mapping (do not use space)')
 window.buttonPlayer1 = {
@@ -35,30 +158,7 @@ const getStars = async () => {
 
 getStars()
 
-const peerConnection = new RTCPeerConnection(null)
-let description = null
-peerConnection.onicecandidate = (event) => {
-	if (event.candidate) return
-	description = peerConnection.localDescription
-	playOnlineButton.addEventListener('click', async () => {
-		await navigator.clipboard.writeText(`${path}?join=${btoa(JSON.stringify(description))}`)
-		playOnlineButton.innerText = 'invitation copied to clipboard'
-	})
-}
 
-const createOfferSDP = async () => {
-	const dataChannel = peerConnection.createDataChannel("chat");
-	const description = await peerConnection.createOffer()
-	peerConnection.setLocalDescription(description)
-
-	dataChannel.onopen = () => { console.log('connected!') }
-	dataChannel.onmessage = ({ data }) => {
-		if (data) console.log(data)
-		else console.log('message without data')
-	}
-};
-
-createOfferSDP()
 
 const updateScore = (snakeSize) => {
 	const score = snakeSize - 10
