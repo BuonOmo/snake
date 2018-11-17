@@ -12,7 +12,6 @@
             padding-top: 60px;
         }
         canvas {
-            margin-top: 8px;
             border: 1px solid black;
         }
         * {
@@ -27,7 +26,8 @@
             color: black;
         }
 
-        button:hover, a:hover {
+        button:not(:disabled):hover, a:hover {
+            cursor: pointer;
             background: black;
             color: white;
         }
@@ -58,18 +58,27 @@
         a:hover > .gh-ico {
             background-image: url('gh-light.png');
         }
+
+        #response {
+            border: 1px solid black;
+            width: 600px;
+        }
     </style>
 </head>
 <body>
+<div class="container">
     <a href="https://github.com/buonomo/snake/"><span class="gh-ico"></span> star<span id="stars"></span></a>
+    <button id="online">play online</button>
+</div>
 <canvas id="game" width="600" height="400"></canvas>
 <div class="container">
-    <div class="container small">
+    <span class="container small">
         <div> score: <span id="score">0</span></div>
         <div>best: <span id="best">..</span></div>
-    </div>
+    </span>
     <button id="restart" hidden>try again</button>
 </div>
+<textarea id="response" placeholder="insert response here to ensure connection" hidden></textarea>
 <script src="index.js" type="module"></script>
 </body>
 </html>
