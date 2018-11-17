@@ -46,7 +46,8 @@ let gameLoaded = false
 
 const log = (type) => (message, data = null) => {
 	const time = new Date()
-	const formattedTime = `${time.getHours()}:${time.getMinutes()}:${time.getSeconds()}.${time.getMilliseconds()}`
+	const pad = str => `0${str}`.slice(-2)
+	const formattedTime = `${pad(time.getHours())}:${pad(time.getMinutes())}:${pad(time.getSeconds())}.${time.getMilliseconds()}`
 	const fullMessage = `${formattedTime} - ${message}`
 	const args = [fullMessage]
 	if (data) args.push(data)
@@ -104,7 +105,14 @@ const stunUrls = [
 ]
 
 const peerConnection = new RTCPeerConnection({
-	iceServers: stunUrls.map(url => ({ urls: [`stun:${url}`] }))
+	iceServers: [
+		...stunUrls.map(url => ({ urls: [`stun:${url}`] })),
+		{
+			url: 'turn:numb.viagenie.ca',
+			credential: 'serverlesssnake',
+			username: 'leguals@gmail.com'
+		}
+	]
 })
 
 peerConnection.oniceconnectionstatechange = () => {
