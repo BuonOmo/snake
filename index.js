@@ -34,6 +34,9 @@ const UPDATE_SCORE_EVENT = 'UPDATE_SCORE_EVERT'
 const params = new URLSearchParams(location.search)
 let joinDescription = params.get('join')
 
+// clean url
+history.pushState(null, "", location.href.split("?")[0])
+
 const host = !joinDescription
 const client = !host
 let online = false
@@ -328,7 +331,7 @@ const CLIENT_SNAKE_CONFIG = { size: 10, headY: 38, onSizeUpdate: updateScore, on
 const setEventListeners = () => {
 	window.addEventListener('keydown', (event) => {
 		if (online && client) {
-			if (controls[event.key] !== undefined) {
+			if (currentGame && controls[event.key] !== undefined) {
 				dataChannel.send(JSON.stringify({
 					type: CHANGE_DIRECTION_EVENT,
 					direction: controls[event.key]
@@ -339,7 +342,7 @@ const setEventListeners = () => {
 				}))
 				loadGame()
 			}
-		} else if (controls[event.key] !== undefined) {
+		} else if (currentGame && controls[event.key] !== undefined) {
 			if (game.snakes[0]) {
 				game.snakes[0].nextDirection = controls[event.key]
 			}
