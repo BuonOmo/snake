@@ -3,6 +3,11 @@ import Fruit from './fruit.js'
 import SceneObject from './scene-object.js'
 
 /**
+ * @type {Node}
+ */
+let canvas
+
+/**
  * @type {CanvasRenderingContext2D|null}
  */
 let context
@@ -19,7 +24,8 @@ let objects = []
 let refreshInterval
 
 export default class Scene {
-	constructor(canvas, snakes = [new Snake], frameReload = 40, blockSize = 10) {
+	constructor(_canvas, snakes = [new Snake], { frameReload = 50, blockSize = 10, onRedraw = () => {} } = {}) {
+		canvas = _canvas
 		this.blockSize = blockSize
 		this.width = canvas.width / blockSize
 		this.height = canvas.height / blockSize
@@ -30,27 +36,36 @@ export default class Scene {
 		this.snakes = snakes
 		objects = []
 		this.frameReload = frameReload
-		snakes.forEach((snake) => this.addObject(snake))
+		this.onRedraw = onRedraw
+		const toDraw = []
+		snakes.forEach((snake) => toDraw.push(...this.addObject(snake)))
+		toDraw.push(...this.addObject(new Fruit(this.availableRandomPosition())))
+		this.redraw(null, toDraw)
 	}
 
 	start() {
-		this.addObject(new Fruit(this.availableRandomPosition()))
-
 		refreshInterval = window.setInterval(() => {
-			const oldPositions = []
-			const newPositions = []
+			const toClear = []
+			const toDraw = []
+
 			this.snakes.forEach((snake) => {
 				const [oldPosition, newPosition] = snake.move()
-				oldPositions.push(oldPosition)
-				newPositions.push(newPosition)
+
+				oldPosition && toClear.push({
+					position: oldPosition,
+				})
+				newPosition && toDraw.push({
+					position: newPosition,
+					color: snake.color
+				})
 			})
 
 			let fruitEaten = false
-			this.snakes.forEach((snake) => {
+			const noDead = this.snakes.every((snake) => {
 				const collisions = this.checkCollisions(snake, snake.head).some((object) => {
 					if(object.isEatable) {
 						snake.eat(object)
-						this.removeObject(object)
+						toClear.push(...this.removeObject(object))
 						fruitEaten = true
 						return false
 					}
@@ -59,20 +74,18 @@ export default class Scene {
 				if (collisions || this.snakeHeadMeetsWall(snake)) {
 					snake.die()
 					this.stop()
-					return
+					return false
 				}
+				return true
 			})
 
-			oldPositions.forEach(position => {
-				if (position !== undefined) this._clearRect(position)
-			})
-			newPositions.forEach((position, index) => {
-				if (position !== undefined) this._drawRect(position, this.snakes[index].color)
-			})
+			if (!noDead) return
 
 			if (fruitEaten) {
-				this.addObject(new Fruit(this.availableRandomPosition()))
+				toDraw.push(...this.addObject(new Fruit(this.availableRandomPosition())))
 			}
+
+			this.redraw(toClear, toDraw)
 		}, 	this.frameReload)
 	}
 
@@ -86,24 +99,43 @@ export default class Scene {
 		window.clearInterval(refreshInterval)
 	}
 
+	becomePassive() {
+		this.passive = true
+		stop()
+	}
+
 	availableRandomPosition() {
 		let x, y, o
 		do {
 			x = Math.floor(Math.random() * this.width)
 			y = Math.floor(Math.random() * this.height)
-			o = new SceneObject([[x, y]])
+			o = new Object([[x, y]])
 		} while(this.checkCollisions(o, [x, y]).length > 0)
 		return [x, y]
 	}
 
+	clear() {
+		context.clearRect(0, 0, canvas.width, canvas.height);
+	}
+
+	redraw(toClear, toDraw) {
+		this.onRedraw(toClear, toDraw)
+		toClear && toClear.forEach(({ position }) => {
+			this._clearRect(position)
+		})
+		toDraw && toDraw.forEach(({ position, color}) => {
+			this._drawRect(position, color)
+		})
+	}
+
 	removeObject(object) {
 		objects = objects.filter((o) => o !== object)
-		object.positions.forEach((position) => this._clearRect(position))
+		return object.positions.map((position) => ({ position }))
 	}
 
 	addObject(object) {
 		objects.push(object)
-		object.positions.forEach((position) => this._drawRect(position, object.color))
+		return object.positions.map((position) => ({ position, color: object.color }))
 	}
 
 	checkCollisions(currentObject, currentPosition) {
