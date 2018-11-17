@@ -80,7 +80,32 @@ const controls = window.controls = {
 
 const game = {}
 
-const peerConnection = new RTCPeerConnection(null)
+// https://gist.github.com/zziuni/3741933
+const stunUrls = [
+	'stun.l.google.com:19302',
+	'stun1.l.google.com:19302',
+	'stun2.l.google.com:19302',
+	'stun3.l.google.com:19302',
+	'stun4.l.google.com:19302',
+	// 'stun01.sipphone.com',
+	// 'stun.ekiga.net',
+	// 'stun.fwdnet.net',
+	// 'stun.ideasip.com',
+	// 'stun.iptel.org',
+	// 'stun.rixtelecom.se',
+	// 'stun.schlund.de',
+	// 'stunserver.org',
+	// 'stun.softjoys.com',
+	// 'stun.voiparound.com',
+	// 'stun.voipbuster.com',
+	// 'stun.voipstunt.com',
+	// 'stun.voxgratia.org',
+	// 'stun.xten.com'
+]
+
+const peerConnection = new RTCPeerConnection({
+	iceServers: stunUrls.map(url => ({ urls: [`stun:${url}`] }))
+})
 
 peerConnection.oniceconnectionstatechange = () => {
 	debug(`[connection] ICE connection state changed to ${peerConnection.iceConnectionState}`)
@@ -108,7 +133,8 @@ function createConnection() {
 	peerConnection.onicecandidate = (event) => {
 		if (event.candidate) return
 		description = peerConnection.localDescription
-		localStorage.setItem(SDP_STORAGE, JSON.stringify(peerConnection.localDescription))
+		playOnlineButton.removeAttribute('hidden')
+
 		playOnlineButton.onclick = async () => {
 			const path = `${window.location.protocol}//${window.location.host}${window.location.pathname}`
 			await navigator.clipboard.writeText(`${path}?join=${btoa(JSON.stringify(description))}`)
@@ -216,6 +242,7 @@ function joinConnection(jsonDescription) {
 
 	peerConnection.onicecandidate = function(e) {
 		if (e.candidate) return
+		playOnlineButton.removeAttribute('hidden')
 		playOnlineButton.innerText = 'click here to copy response'
 		playOnlineButton.onclick = async () => {
 			await navigator.clipboard.writeText(btoa(JSON.stringify(description)))
