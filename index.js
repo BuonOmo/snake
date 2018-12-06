@@ -174,7 +174,7 @@ function createConnection() {
 				  startGame()
 					break
 				case CHANGE_DIRECTION_EVENT:
-					if (Object.values(controls).includes(data.direction)) game.snakes[1].nextDirection = data.direction
+					if (Object.values(window.controls).includes(data.direction)) game.snakes[1].nextDirection = data.direction
 					break
 				default:
 					error(`[channel] message unhandled, type was '${data.type}'.`, data)
@@ -366,10 +366,10 @@ const CLIENT_SNAKE_CONFIG = { size: 10, headY: 38, onSizeUpdate: updateScore, on
 const setEventListeners = () => {
 	window.addEventListener('keydown', (event) => {
 		if (online && client) {
-			if (currentGame && controls[event.key] !== undefined) {
+			if (currentGame && window.controls[event.key] !== undefined) {
 				dataChannel.send(JSON.stringify({
 					type: CHANGE_DIRECTION_EVENT,
-					direction: controls[event.key]
+					direction: window.controls[event.key]
 				}))
 			} else if (event.key === ' ') {
 				dataChannel.send(JSON.stringify({
@@ -377,9 +377,9 @@ const setEventListeners = () => {
 				}))
 				loadGame()
 			}
-		} else if (currentGame && controls[event.key] !== undefined) {
+		} else if (currentGame && window.controls[event.key] !== undefined) {
 			if (game.snakes[0]) {
-				game.snakes[0].nextDirection = controls[event.key]
+				game.snakes[0].nextDirection = window.controls[event.key]
 			}
 		} else if (event.key === ' ') {
 			loadGame()
